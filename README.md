@@ -21,3 +21,16 @@ public:
         this->estado = "Listo";  // Estado inicial es "Listo"
     }
 };
+
+// Nodo para lista enlazada
+class Nodo {
+public:
+    Proceso* proceso;  // Puntero al objeto Proceso
+    Nodo* siguiente;   // Puntero al siguiente nodo en la lista
+
+    // Constructor de la clase Nodo
+    Nodo(Proceso* p) {
+        proceso = p;
+        siguiente = NULL; // Inicialmente, no hay siguiente nodo
+    }
+};
