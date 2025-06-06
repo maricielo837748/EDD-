@@ -2,121 +2,118 @@
 #include <string>
 using namespace std;
 
-// Clase Proceso
-// Esta clase representa a un proceso en el sistema. Cada proceso tiene un ID, un nombre,
-// una prioridad, y un estado inicial de "Listo".
-class Proceso {
-public:
-    int id;           // Identificador único del proceso
-    string nombre;    // Nombre del proceso
-    int prioridad;    // Prioridad del proceso (se usa para planificar su ejecución)
-    string estado;    // Estado del proceso (por ejemplo, "Listo", "Ejecutando", etc.)
-
-    // Constructor de la clase Proceso
-    // Inicializa los atributos de la clase con los valores proporcionados
-    Proceso(int id, string nombre, int prioridad) {
-        this->id = id;
-        this->nombre = nombre;
-        this->prioridad = prioridad;
-        this->estado = "Listo";  // Estado inicial es "Listo"
-    }
+// Estructura del proceso
+struct Proceso {
+    int id;                    // Identificador único del proceso
+    string nombre;             // Nombre del proceso
+    int prioridad;             // Nivel de prioridad del proceso
+    Proceso* siguiente;        // Puntero al siguiente proceso en la lista
 };
 
-// Nodo para lista enlazada
-class Nodo {
+
+// Lista enlazada para gestor de procesos
+class ListaProcesos {
+    Proceso* cabeza;           // Puntero al primer proceso de la lista
 public:
-    Proceso* proceso;  // Puntero al objeto Proceso
-    Nodo* siguiente;   // Puntero al siguiente nodo en la lista
+    // Constructor que inicializa la lista vacía
+    ListaProcesos() : cabeza(NULL) {}
 
-    // Constructor de la clase Nodo
-    Nodo(Proceso* p) {
-        proceso = p;
-        siguiente = NULL; // Inicialmente, no hay siguiente nodo
-    }
-};
 
-// Lista enlazada - Gestor de procesos
-class ListaEnlazada {
-private:
-    Nodo* cabeza; // Puntero al primer nodo de la lista
-
-public:
-    // Constructor de la clase ListaEnlazada
-    ListaEnlazada() {
-        cabeza = NULL; // Inicialmente, la lista está vacía
-    }
-
-    // Método para insertar un proceso en la lista
-    void insertar(Proceso* p) {
-        Nodo* nuevo = new Nodo(p);
-        if (cabeza == NULL) {
-            cabeza = nuevo;
+        // Inserta un nuevo proceso al final de la lista
+    void insertarProceso(int id, string nombre, int prioridad) {
+        Proceso* nuevo = new Proceso;           // Se crea un nuevo nodo Proceso en memoria dinámica
+        nuevo->id = id;                         // Se asigna el ID al nuevo proceso
+        nuevo->nombre = nombre;                 // Se asigna el nombre
+        nuevo->prioridad = prioridad;           // Se asigna la prioridad
+        nuevo->siguiente = NULL;                // El puntero siguiente se inicializa como NULL (último elemento)
+        if (!cabeza) {                          // Si la lista está vacía
+            cabeza = nuevo;                     // El nuevo proceso se convierte en el primero
         } else {
-            Nodo* temp = cabeza;
-            while (temp->siguiente != NULL) {
-                temp = temp->siguiente;
-            }
-            temp->siguiente = nuevo;
+            Proceso* actual = cabeza;           // Se recorre desde el principio
+            while (actual->siguiente)           // Mientras no se llegue al último nodo
+                actual = actual->siguiente;     // Avanza al siguiente nodo
+            actual->siguiente = nuevo;          // Se enlaza el nuevo proceso al final
         }
-        cout << "Proceso agregado correctamente." << endl;
+        cout << "Proceso insertado correctamente.\n";  // Mensaje de éxito
     }
 
-    // Método para eliminar un proceso por su ID
-    void eliminar(int id) {
-        Nodo* temp = cabeza;
-        Nodo* anterior = NULL;
 
-        while (temp != NULL && temp->proceso->id != id) {
-            anterior = temp;
-            temp = temp->siguiente;
-        }
-
-        if (temp == NULL) {
-            cout << "Proceso no encontrado." << endl;
+        // Muestra todos los procesos registrados en la lista
+    void mostrarProcesos() {
+        if (!cabeza) {                          // Si la lista está vacía
+            cout << "No hay procesos registrados.\n";
             return;
         }
+        Proceso* actual = cabeza;               // Se empieza desde el primer nodo
+        cout << "Procesos registrados:\n";
+        while (actual) {                        // Mientras haya nodos en la lista
+            // Se imprime la información del proceso actual
+            cout << "ID: " << actual->id << " | Nombre: " << actual->nombre << " | Prioridad: " << actual->prioridad << "\n";
+            actual = actual->siguiente;         // Avanza al siguiente nodo
+        }
+    }
 
-        if (anterior == NULL) {
-            cabeza = temp->siguiente;
+
+        // Busca un proceso por ID y retorna su puntero si lo encuentra
+    Proceso* buscarPorID(int id) {
+        Proceso* actual = cabeza;               // Se empieza desde la cabeza
+        while (actual) {                        // Mientras haya procesos
+            if (actual->id == id) return actual; // Si el ID coincide, retorna el puntero al proceso
+            actual = actual->siguiente;         // Avanza al siguiente
+        }
+        return NULL;                            // Si no se encuentra, retorna NULL
+    }
+
+
+        // Busca un proceso por nombre y retorna su puntero si lo encuentra
+    Proceso* buscarPorNombre(const string& nombre) {
+        Proceso* actual = cabeza;               // Comienza desde la cabeza
+        while (actual) {
+            if (actual->nombre == nombre)       // Si el nombre coincide
+                return actual;                  // Retorna el proceso
+            actual = actual->siguiente;         // Avanza al siguiente nodo
+        }
+        return NULL;                            // Si no lo encuentra, retorna NULL
+    }
+
+
+        // Elimina un proceso de la lista por su ID
+    void eliminarProceso(int id) {
+        if (!cabeza) {                          // Si la lista está vacía
+            cout << "No hay procesos para eliminar.\n";
+            return;
+        }
+        if (cabeza->id == id) {                 // Si el proceso a eliminar está al principio
+            Proceso* aEliminar = cabeza;        // Guarda el nodo a eliminar
+            cabeza = cabeza->siguiente;         // Actualiza la cabeza al siguiente
+            delete aEliminar;                   // Libera la memoria del nodo
+            cout << "Proceso eliminado.\n";
+            return;
+        }
+        Proceso* actual = cabeza;               // Nodo actual para recorrer la lista
+        // Busca el nodo anterior al que se va a eliminar
+        while (actual->siguiente && actual->siguiente->id != id) {
+            actual = actual->siguiente;
+        }
+        if (actual->siguiente) {                // Si se encontró el nodo a eliminar
+            Proceso* aEliminar = actual->siguiente;
+            actual->siguiente = aEliminar->siguiente;  // Enlaza el anterior con el siguiente del eliminado
+            delete aEliminar;                   // Libera memoria
+            cout << "Proceso eliminado.\n";
         } else {
-            anterior->siguiente = temp->siguiente;
+            cout << "Proceso no encontrado.\n"; // No se encontró el proceso con el ID
         }
-
-        delete temp;
-        cout << "Proceso eliminado correctamente." << endl;
     }
 
-    // Método para buscar un proceso por su ID
-    Proceso* buscar(int id) {
-        Nodo* temp = cabeza;
-        while (temp != NULL) {
-            if (temp->proceso->id == id)
-                return temp->proceso;
-            temp = temp->siguiente;
-        }
-        return NULL;
-    }
 
-    // Método para modificar la prioridad de un proceso
-    void modificar_prioridad(int id, int nueva_prioridad) {
-        Proceso* p = buscar(id);
-        if (p != NULL) {
-            p->prioridad = nueva_prioridad;
-            cout << "Prioridad modificada correctamente." << endl;
+        // Modifica la prioridad de un proceso dado su ID
+    void modificarPrioridad(int id, int nuevaPrioridad) {
+        Proceso* p = buscarPorID(id);           // Se busca el proceso con ese ID
+        if (p) {
+            p->prioridad = nuevaPrioridad;      // Si se encuentra, se actualiza su prioridad
+            cout << "Prioridad modificada.\n";
         } else {
-            cout << "Proceso no encontrado." << endl;
-        }
-    }
-
-    // Método para mostrar todos los procesos en la lista
-    void mostrar() {
-        Nodo* temp = cabeza;
-        while (temp != NULL) {
-            cout << "ID: " << temp->proceso->id
-                 << ", Nombre: " << temp->proceso->nombre
-                 << ", Prioridad: " << temp->proceso->prioridad
-                 << ", Estado: " << temp->proceso->estado << endl;
-            temp = temp->siguiente;
+            cout << "Proceso no encontrado.\n"; // Si no se encuentra, se informa
         }
     }
 };
