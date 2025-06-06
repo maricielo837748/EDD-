@@ -191,7 +191,7 @@ public:
 };
 
 
-// Nodo para la pila (Gestor de memoria)
+// NODO PARA LA PILA (Gestor de memoria)
 struct NodoPila {
     int bloqueMemoria;          // Representa un bloque de memoria asignado
     NodoPila* siguiente;        // Puntero al siguiente nodo en la pila (el anterior bloque asignado)
