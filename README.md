@@ -120,4 +120,69 @@ public:
         }
     }
 };
+// Clase que representa un planificador de CPU basado en una cola de prioridad.
+// Utiliza una lista enlazada para mantener los procesos ordenados por prioridad.
+class PlanificadorCPU {
+private:
+    Nodo* frente; // Puntero al primer nodo de la cola (proceso con mayor prioridad)
 
+public:
+    // Constructor: inicializa la cola vacía
+    PlanificadorCPU() {
+        frente = NULL;
+    }
+
+    // Método para encolar un proceso en la cola de prioridad.
+    // Los procesos con mayor prioridad (valor numérico más alto) se colocan al frente.
+    void encolar(Proceso p) {
+        // Se crea un nuevo nodo con una copia del proceso recibido.
+        Nodo* nuevo = new Nodo(new Proceso(p.id, p.nombre, p.prioridad));
+
+        // Si la cola está vacía o el nuevo proceso tiene mayor prioridad que el primero:
+        if (frente == NULL || nuevo->proceso->prioridad > frente->proceso->prioridad) {
+            nuevo->siguiente = frente;
+            frente = nuevo;
+        } else {
+            // Buscar la posición adecuada en la cola (por prioridad)
+            Nodo* temp = frente;
+            while (temp->siguiente != NULL && temp->siguiente->proceso->prioridad >= nuevo->proceso->prioridad) {
+                temp = temp->siguiente;
+            }
+            // Insertar el nuevo nodo en la posición encontrada
+            nuevo->siguiente = temp->siguiente;
+            temp->siguiente = nuevo;
+        }
+
+        // Commit: Maricielo - Implementación del encolado de procesos en la cola de prioridad
+    }
+
+    // Método para desencolar (eliminar) el proceso con mayor prioridad (el del frente).
+    void desencolar() {
+        if (frente == NULL) {
+            cout << "La cola está vacía." << endl;
+            return;
+        }
+
+        // Eliminar el nodo del frente y mostrar sus datos
+        Nodo* temp = frente;
+        frente = frente->siguiente;
+
+        cout << "Ejecutando proceso ID: " << temp->proceso->id
+             << ", Nombre: " << temp->proceso->nombre << endl;
+
+        delete temp;
+
+        // Commit: Maricielo - Implementación de desencolado de proceso para ejecución
+    }
+
+    // Método para mostrar todos los procesos en la cola, en orden de prioridad.
+    void mostrar_cola() {
+        Nodo* temp = frente;
+        while (temp != NULL) {
+            cout << "ID: " << temp->proceso->id
+                 << ", Nombre: " << temp->proceso->nombre
+                 << ", Prioridad: " << temp->proceso->prioridad << endl;
+            temp = temp->siguiente;
+        }
+    }
+};
